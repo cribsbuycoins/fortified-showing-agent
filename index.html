@@ -417,51 +417,20 @@
           fileData: base64
         };
 
-        // Use a hidden form + iframe to submit data.
-        // This avoids CORS/redirect issues with Google Apps Script.
-        const iframeName = 'submit-frame-' + Date.now();
-        let iframe = document.createElement('iframe');
-        iframe.name = iframeName;
-        iframe.style.display = 'none';
-        document.body.appendChild(iframe);
+        const resp = await fetch(APPS_SCRIPT_URL, {
+          redirect: 'follow',
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload)
+        });
 
-        const hiddenForm = document.createElement('form');
-        hiddenForm.method = 'POST';
-        hiddenForm.action = APPS_SCRIPT_URL;
-        hiddenForm.target = iframeName;
-        hiddenForm.style.display = 'none';
+        clearInterval(progInterval);
+        progressFill.style.width = '100%';
 
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = 'payload';
-        input.value = JSON.stringify(payload);
-        hiddenForm.appendChild(input);
-
-        document.body.appendChild(hiddenForm);
-        hiddenForm.submit();
-
-        // Wait for iframe to load (submission complete)
-        iframe.onload = () => {
-          clearInterval(progInterval);
-          progressFill.style.width = '100%';
-          setTimeout(() => {
-            formState.classList.add('hidden');
-            successState.classList.add('visible');
-          }, 600);
-          // Cleanup
-          setTimeout(() => {
-            document.body.removeChild(iframe);
-            document.body.removeChild(hiddenForm);
-          }, 2000);
-        };
-
-        // Fallback timeout in case onload doesn't fire
         setTimeout(() => {
-          clearInterval(progInterval);
-          progressFill.style.width = '100%';
           formState.classList.add('hidden');
           successState.classList.add('visible');
-        }, 15000);
+        }, 600);
 
       } catch (err) {
         statusMsg.textContent = 'Something went wrong. Please try again.';

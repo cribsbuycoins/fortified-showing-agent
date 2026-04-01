@@ -37,13 +37,7 @@ const GOOGLE_CHAT_WEBHOOK = 'https://chat.googleapis.com/v1/spaces/AAQAdS7gYW4/m
 
 function doPost(e) {
   try {
-    // Handle both JSON body and form-encoded payload
-    let data;
-    if (e.parameter && e.parameter.payload) {
-      data = JSON.parse(e.parameter.payload);
-    } else {
-      data = JSON.parse(e.postData.contents);
-    }
+    const data = JSON.parse(e.postData.contents);
 
     const fullName  = data.fullName || 'Unknown';
     const phone     = data.phone || 'N/A';
